@@ -16,23 +16,22 @@ client.on('ready', async () => {
 
 async function setPrice() {
     try {
-        const contractAddress = process.env.CONTRACT_ADDRESS as string;
-        const networkId = process.env.NETWORK_ID as string; // "ethereum", "binance-smart-chain", etc.
+        const symbolTicker = process.env.SYMBOL_TICKER as string; // Make sure this matches your env
+        const contractAddress = process.env.CONTRACT_ADDRESS as string; // Assuming you've added this
 
-        // Assuming DexScreener has an endpoint format like this - adjust as needed
+        // Updated URL for fetching data
         const url = `https://api.dexscreener.com/latest/dex/tokens/${contractAddress}`;
         const response = await fetch(url);
         const result = await response.json();
 
-        // Adjust these paths according to the actual response structure from DexScreener
-        const price = result.pair.lastPrice; // Example path
-        // DexScreener may not provide a direct 1h price change, you might need to calculate or adjust based on available data
+        // Accessing the first pair's USD price and price change over the last 24 hours
+        const priceUsd = result.pairs[0].priceUsd;
+        const priceChange24h = result.pairs[0].priceChange.h24;
 
-        if (price === undefined) throw new Error('Data Not Found.');
+        if (!priceUsd) throw new Error('Price data not found.');
 
-        const formattedPrice = `$${Number(price).toFixed(5)}`;
-        // Example: if DexScreener does not provide price change, skip or implement alternative
-        const formattedChange = `+0.00%`; // Placeholder
+        const formattedPrice = `$${Number(priceUsd).toFixed(5)}`;
+        const formattedChange = `${priceChange24h}%`; // Assuming this is a percentage
 
         client.guilds.cache.forEach(async (guild) => {
             try {
@@ -44,7 +43,7 @@ async function setPrice() {
 
         client.user?.setPresence({
             activities: [{
-                name: `1h: ${formattedChange}`,
+                name: `24h: ${formattedChange}`,
                 type: ActivityType.Watching
             }],
             status: 'online'
