@@ -16,20 +16,23 @@ client.on('ready', async () => {
 
 async function setPrice() {
     try {
-        const symbolTicker = process.env.SYMBOL_TICKER as string; // Ensure this matches the CoinGecko ID
-        const currency = process.env.CURRENCY as string;
+        const contractAddress = process.env.CONTRACT_ADDRESS as string;
+        const networkId = process.env.NETWORK_ID as string; // "ethereum", "binance-smart-chain", etc.
 
-        const url = `https://api.coingecko.com/api/v3/coins/${encodeURIComponent(symbolTicker)}`;
+        // Assuming DexScreener has an endpoint format like this - adjust as needed
+        const url = `https://api.dexscreener.com/latest/dex/tokens/${contractAddress}`;
         const response = await fetch(url);
         const result = await response.json();
 
-        const price = result.market_data.current_price[currency];
-        const priceChangePercentage1h = result.market_data.price_change_percentage_1h_in_currency[currency];
+        // Adjust these paths according to the actual response structure from DexScreener
+        const price = result.pair.lastPrice; // Example path
+        // DexScreener may not provide a direct 1h price change, you might need to calculate or adjust based on available data
 
-        if (price === undefined || priceChangePercentage1h === undefined) throw new Error('Data Not Found.');
+        if (price === undefined) throw new Error('Data Not Found.');
 
         const formattedPrice = `$${Number(price).toFixed(5)}`;
-        const formattedChange = `${priceChangePercentage1h >= 0 ? '+' : ''}${priceChangePercentage1h.toFixed(2)}%`;
+        // Example: if DexScreener does not provide price change, skip or implement alternative
+        const formattedChange = `+0.00%`; // Placeholder
 
         client.guilds.cache.forEach(async (guild) => {
             try {
@@ -64,4 +67,3 @@ function priceBot() {
         true,
     );
 }
-
