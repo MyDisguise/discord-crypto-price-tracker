@@ -28,7 +28,7 @@ async function setPrice() {
 
         if (price === undefined || priceChangePercentage1h === undefined) throw new Error('Data Not Found.');
 
-        const formattedPrice = `$${Number(price).toFixed(2)}`;
+        const formattedPrice = `$${Number(price).toFixed(5)}`;
         const formattedChange = `${priceChangePercentage1h >= 0 ? '+' : ''}${priceChangePercentage1h.toFixed(2)}%`;
 
         client.guilds.cache.forEach(async (guild) => {
